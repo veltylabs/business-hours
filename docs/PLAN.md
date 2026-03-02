@@ -1,4 +1,4 @@
-# business-hours — Implementation Plan
+# business-hours — Implementation Plan.
 
 > **Module:** `github.com/veltylabs/business-hours`
 > **Package:** `businesshours`
