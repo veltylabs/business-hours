@@ -6,6 +6,7 @@ import (
     "context"
 
     "github.com/tinywasm/fmt"
+    "github.com/tinywasm/mcp"
     "github.com/tinywasm/orm"
     "github.com/tinywasm/unixid"
 )
@@ -17,11 +18,30 @@ type Module struct {
 }
 
 func New(db *orm.DB) (*Module, error) {
+    if err := db.CreateTable(&BusinessHours{}); err != nil {
+        return nil, err
+    }
     u, err := unixid.NewUnixID()
     if err != nil {
         return nil, err
     }
     return &Module{db: db, uid: u}, nil
+}
+
+func (m *Module) GetMCPToolsMetadata() []mcp.ToolMetadata {
+    return []mcp.ToolMetadata{
+        {
+            Name:        "get_business_hours",
+            Description: "Returns the weekly operating schedule.",
+            Execute:     m.GetBusinessHours,
+        },
+    }
+}
+
+// RegisterTools registers all business-hours MCP tools on the given server.
+// Call once during application startup after New(db).
+func (m *Module) RegisterTools(srv *mcp.MCPServer) {
+    srv.RegisterProvider(m)
 }
 
 // GetBusinessHours returns the weekly operating schedule.

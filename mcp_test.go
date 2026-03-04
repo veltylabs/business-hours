@@ -7,17 +7,65 @@ import (
     "strings"
     "testing"
 
+    "github.com/tinywasm/mcp"
     "github.com/tinywasm/sqlite"
 )
 
 func setupTestModule(t *testing.T) *Module {
     db, _ := sqlite.Open(":memory:")
-    err := db.CreateTable(&BusinessHours{})
+    m, err := New(db)
     if err != nil {
-        t.Fatalf("failed to create table: %v", err)
+        t.Fatalf("failed to create module: %v", err)
     }
-    m, _ := New(db)
     return m
+}
+
+func TestNew_CreatesTable(t *testing.T) {
+    db, _ := sqlite.Open(":memory:")
+    _, err := New(db)
+    if err != nil {
+        t.Fatalf("expected no error, got %v", err)
+    }
+
+    // Verify table was created by attempting to query it
+    rows, err := ReadAllBusinessHours(db.Query(&BusinessHours{}))
+    if err != nil {
+        t.Fatalf("expected no error querying business_hours table, got %v", err)
+    }
+    if len(rows) != 0 {
+        t.Errorf("expected 0 rows, got %d", len(rows))
+    }
+}
+
+func TestNew_TableCreationError(t *testing.T) {
+    // A quick way to make CreateTable fail is to pass a nil DB, but since New(db) does db.CreateTable, that would panic
+    // Instead, let's just make it fail by closing the database first
+    db, _ := sqlite.Open(":memory:")
+    db.Close()
+
+    _, err := New(db)
+    if err == nil {
+        t.Fatal("expected error when table creation fails")
+    }
+}
+
+func TestGetMCPToolsMetadata(t *testing.T) {
+    m := setupTestModule(t)
+    tools := m.GetMCPToolsMetadata()
+    if len(tools) != 1 {
+        t.Fatalf("expected 1 tool, got %d", len(tools))
+    }
+    if tools[0].Name != "get_business_hours" {
+        t.Errorf("expected tool name 'get_business_hours', got %q", tools[0].Name)
+    }
+}
+
+func TestRegisterTools(t *testing.T) {
+    m := setupTestModule(t)
+    // We just ensure it doesn't panic. To fully test RegisterTools we'd need to mock mcp.MCPServer
+    // but RegisterTools delegates to srv.RegisterProvider, so passing a real *mcp.MCPServer is enough to cover the line
+    srv := mcp.NewMCPServer("test", "1.0.0")
+    m.RegisterTools(srv)
 }
 
 func TestGetBusinessHours_FullWeek(t *testing.T) {
