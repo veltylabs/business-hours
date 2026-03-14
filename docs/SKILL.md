@@ -9,7 +9,7 @@ The `get_business_hours` MCP tool is the single read endpoint.
 |------|------|
 | `model.go` | `BusinessHours` struct + `TableName()` |
 | `model_orm.go` | Auto-generated ORM helpers — DO NOT EDIT |
-| `mcp.go` | `Module`, `New(db)`, `GetMCPToolsMetadata()`, `RegisterTools()`, `GetBusinessHours()`, `buildScheduleResponse()` |
+| `mcp.go` | `Module`, `New(db)`, `GetMCPTools()`, `RegisterTools()`, `GetBusinessHours()`, `buildScheduleResponse()` |
 | `mcp_test.go` | All tests (`!wasm` build tag, `:memory:` SQLite) |
 
 ## Constraints
