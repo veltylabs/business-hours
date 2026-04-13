@@ -110,8 +110,17 @@ func TestGetBusinessHours_FullWeek(t *testing.T) {
 		t.Fatalf("expected success result, got error: %s", res.Content)
 	}
 
+	var content string = res.Content
+	var envelope struct {
+		Type string `json:"type"`
+		Text string `json:"text"`
+	}
+	if err := json.Unmarshal([]byte(res.Content), &envelope); err == nil && envelope.Type == "text" {
+		content = envelope.Text
+	}
+
 	var schedResp scheduleResponse
-	err = json.Unmarshal([]byte(res.Content), &schedResp)
+	err = json.Unmarshal([]byte(content), &schedResp)
 	if err != nil {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}

@@ -55,7 +55,7 @@ func (m *Module) GetBusinessHours(ctx *context.Context, req mcp.Request) (*mcp.R
 	if err != nil {
 		return &mcp.Result{IsError: true, Content: err.Error()}, nil
 	}
-	return &mcp.Result{IsError: false, Content: string(b)}, nil
+	return mcp.Text(string(b)), nil
 }
 
 var dayNames = [7]string{"Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"}
