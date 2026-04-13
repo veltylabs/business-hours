@@ -3,10 +3,11 @@
 package businesshours
 
 import (
-	"context"
+	"encoding/json"
 	"strings"
 	"testing"
 
+	"github.com/tinywasm/context"
 	"github.com/tinywasm/mcp"
 	"github.com/tinywasm/sqlite"
 )
@@ -51,7 +52,7 @@ func TestNew_TableCreationError(t *testing.T) {
 
 func TestGetMCPToolsMetadata(t *testing.T) {
 	m := setupTestModule(t)
-	tools := m.GetMCPTools()
+	tools := m.Tools()
 	if len(tools) != 1 {
 		t.Fatalf("expected 1 tool, got %d", len(tools))
 	}
@@ -62,10 +63,9 @@ func TestGetMCPToolsMetadata(t *testing.T) {
 
 func TestRegisterTools(t *testing.T) {
 	m := setupTestModule(t)
-	// We just ensure it doesn't panic. To fully test RegisterTools we'd need to mock mcp.MCPServer
-	// but RegisterTools delegates to srv.RegisterProvider, so passing a real *mcp.MCPServer is enough to cover the line
-	srv := mcp.NewMCPServer("test", "1.0.0")
-	m.RegisterTools(srv)
+	// New API: register by passing providers to mcp.NewServer
+	cfg := mcp.Config{Name: "test", Version: "1.0.0"}
+	_, _ = mcp.NewServer(cfg, []mcp.ToolProvider{m})
 }
 
 func TestGetBusinessHours_FullWeek(t *testing.T) {
@@ -99,14 +99,21 @@ func TestGetBusinessHours_FullWeek(t *testing.T) {
 		}
 	}
 
-	res, err := m.GetBusinessHours(context.Background(), nil)
+	res, err := m.GetBusinessHours(&context.Context{}, mcp.Request{})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	schedResp, ok := res.(scheduleResponse)
-	if !ok {
-		t.Fatalf("expected scheduleResponse, got %T", res)
+	t.Logf("Result: %+v", res)
+
+	if res.IsError {
+		t.Fatalf("expected success result, got error: %s", res.Content)
+	}
+
+	var schedResp scheduleResponse
+	err = json.Unmarshal([]byte(res.Content), &schedResp)
+	if err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
 	}
 
 	if len(schedResp.Schedule) != 7 {
@@ -127,12 +134,15 @@ func TestGetBusinessHours_FullWeek(t *testing.T) {
 func TestGetBusinessHours_Empty(t *testing.T) {
 	m := setupTestModule(t)
 
-	_, err := m.GetBusinessHours(context.Background(), nil)
-	if err == nil {
-		t.Fatal("expected error, got nil")
+	res, err := m.GetBusinessHours(&context.Context{}, mcp.Request{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(err.Error(), "schedule not found") {
-		t.Errorf("expected 'schedule not found', got %q", err.Error())
+	if !res.IsError {
+		t.Fatal("expected error result, got success")
+	}
+	if !strings.Contains(res.Content, "schedule not found") {
+		t.Errorf("expected 'schedule not found', got %q", res.Content)
 	}
 }
 
@@ -145,12 +155,15 @@ func TestGetBusinessHours_DBFailure(t *testing.T) {
 		t.Fatalf("failed to drop table: %v", err)
 	}
 
-	_, err = m.GetBusinessHours(context.Background(), nil)
-	if err == nil {
-		t.Fatal("expected error, got nil")
+	res, err := m.GetBusinessHours(&context.Context{}, mcp.Request{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
-	if !strings.Contains(err.Error(), "database unavailable") {
-		t.Errorf("expected 'database unavailable', got %q", err.Error())
+	if !res.IsError {
+		t.Fatal("expected error result, got success")
+	}
+	if !strings.Contains(res.Content, "database unavailable") {
+		t.Errorf("expected 'database unavailable', got %q", res.Content)
 	}
 }
 
