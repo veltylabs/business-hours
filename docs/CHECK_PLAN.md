@@ -2,14 +2,9 @@
 
 ## Status
 
-**The module does NOT compile.** Two errors in `mcp.go`:
-
-```
-./mcp.go:36:4: unknown field Execute in struct literal of type mcp.Tool
-./mcp.go:44:23: *Module does not implement mcp.ToolProvider (missing method GetMCPToolsMetadata)
-```
-
-Root cause: `mcp.go` was written for an intermediate mcp version with `Tool.Execute` and `GetMCPTools()`, but `go.mod` pins `tinywasm/mcp v0.0.4` which uses `GetMCPToolsMetadata()`. The target migration must go all the way to the **current API (v0.1.1)** which is a further breaking change from both.
+**COMPLETED.** All stages executed.
+The module builds and all tests pass with `tinywasm/mcp v0.1.1`.
+Documentation (`ARCHITECTURE.md` and `SKILL.md`) has been updated.
 
 ---
 
@@ -288,5 +283,5 @@ Expected: zero compilation errors, all tests pass.
 
 ## Linked Documents
 
+- [README.md](../README.md)
 - [ARCHITECTURE.md](ARCHITECTURE.md)
-- [SKILL.md](SKILL.md)

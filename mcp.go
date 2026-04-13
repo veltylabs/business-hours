@@ -3,8 +3,9 @@
 package businesshours
 
 import (
-	"context"
+	"encoding/json"
 
+	"github.com/tinywasm/context"
 	"github.com/tinywasm/fmt"
 	"github.com/tinywasm/mcp"
 	"github.com/tinywasm/orm"
@@ -28,33 +29,33 @@ func New(db *orm.DB) (*Module, error) {
 	return &Module{db: db, uid: u}, nil
 }
 
-func (m *Module) GetMCPTools() []mcp.Tool {
+// Tools implements mcp.ToolProvider.
+func (m *Module) Tools() []mcp.Tool {
 	return []mcp.Tool{
 		{
 			Name:        "get_business_hours",
 			Description: "Returns the weekly operating schedule.",
+			Resource:    "business_hours",
+			Action:      'r',
 			Execute:     m.GetBusinessHours,
 		},
 	}
 }
 
-// RegisterTools registers all business-hours MCP tools on the given server.
-// Call once during application startup after New(db).
-func (m *Module) RegisterTools(srv *mcp.MCPServer) {
-	srv.RegisterProvider(m)
-}
-
 // GetBusinessHours returns the weekly operating schedule.
-// Signature matches ToolHandler: func(context.Context, map[string]any) (any, error)
-func (m *Module) GetBusinessHours(ctx context.Context, args map[string]any) (any, error) {
-	rows, err := ReadAllBusinessHours(m.db.Query(&BusinessHours{}).OrderBy(BusinessHoursMeta.DayOfWeek).Asc())
+func (m *Module) GetBusinessHours(ctx *context.Context, req mcp.Request) (*mcp.Result, error) {
+	rows, err := ReadAllBusinessHours(m.db.Query(&BusinessHours{}).OrderBy(BusinessHours_.DayOfWeek).Asc())
 	if err != nil {
-		return nil, fmt.Err("database", "unavailable") // EN: Database Unavailable
+		return &mcp.Result{IsError: true, Content: fmt.Err("database", "unavailable").Error()}, nil
 	}
 	if len(rows) == 0 {
-		return nil, fmt.Err("schedule", "not", "found") // EN: Schedule Not Found
+		return &mcp.Result{IsError: true, Content: fmt.Err("schedule", "not", "found").Error()}, nil
 	}
-	return buildScheduleResponse(rows), nil
+	b, err := json.Marshal(buildScheduleResponse(rows))
+	if err != nil {
+		return &mcp.Result{IsError: true, Content: err.Error()}, nil
+	}
+	return mcp.Text(string(b)), nil
 }
 
 var dayNames = [7]string{"Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"}
