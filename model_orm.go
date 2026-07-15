@@ -75,3 +75,4 @@ func ReadAllBusinessHours(qb *orm.QB) ([]*BusinessHours, error) {
 	)
 	return results, err
 }
+

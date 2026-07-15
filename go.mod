@@ -1,4 +1,4 @@
-module github.com/veltylabs/business-hours
+module github.com/veltylabs/business_hours
 
 go 1.25.2
 
