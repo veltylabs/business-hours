@@ -85,7 +85,7 @@ func TestGetBusinessHours_FullWeek(t *testing.T) {
 		}
 
 		bh := &BusinessHours{
-			ID:        m.uid.GetNewID(),
+			ID:        m.uid.NewID(),
 			DayOfWeek: i,
 			OpenTime:  open,
 			CloseTime: close,
