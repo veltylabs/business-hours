@@ -3,8 +3,9 @@ PLAN: "test: business_hours raise coverage to >=80% with real-value tests only"
 TAG: v0.1.1
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 505214643943169918
+PR: https://github.com/veltylabs/business_hours/pull/6
 ---
 
 > This plan is dispatched via the CodeJob workflow. See skill: **agents-workflow**.

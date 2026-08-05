@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tinywasm/fmt"
+	"github.com/tinywasm/json"
 	"github.com/tinywasm/model"
 	"github.com/tinywasm/orm"
 	"github.com/tinywasm/router/mock"
@@ -75,6 +76,13 @@ func TestGetSchedule_FullWeek(t *testing.T) {
 	}
 }
 
+func TestNew_RequiresIDs(t *testing.T) {
+	db := orm.New(mem.New())
+	if _, err := businesshours.New(db, businesshours.Deps{}); err == nil {
+		t.Fatal("expected an error when Deps.IDs is nil")
+	}
+}
+
 func TestGetSchedule_Empty(t *testing.T) {
 	m, _, _ := setup(t)
 	_, err := m.GetSchedule()
@@ -86,6 +94,10 @@ func TestGetSchedule_Empty(t *testing.T) {
 func TestMountOps_GetBusinessHours(t *testing.T) {
 	m, db, ids := setup(t)
 	seedWeek(t, db, ids)
+
+	if m.ModelName() != "business_hours" {
+		t.Fatalf("expected ModelName %q, got %q", "business_hours", m.ModelName())
+	}
 
 	// El valor cero de mock.Router es legal (sin Authn, sin Authorize) pero DENIEGA cada ruta
 	// protegida (model.Allowed(nil, ...) == false) — configure un Authorize que lo permita, para que la
@@ -118,5 +130,37 @@ func TestMountOps_GetBusinessHours(t *testing.T) {
 	}
 	if len(ctx.ResponseBody()) == 0 {
 		t.Error("expected a non-empty encoded response body")
+	}
+
+	// Decodifica la respuesta a través del codec real (no solo revisa que el body no esté vacío) —
+	// prueba que el contrato de wire realmente funciona de punta a punta, y ejercita
+	// BusinessHoursList.Append/DecodeFields, que ningún otro test recorre hoy.
+	var got businesshours.BusinessHoursList
+	if err := json.Decode(ctx.ResponseBody(), &got); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if len(got) != 7 {
+		t.Fatalf("expected 7 decoded rows, got %d", len(got))
+	}
+	if !got[1].IsOpen || got[1].OpenTime != "08:00" {
+		t.Errorf("Monday decoded incorrectly: %+v", got[1])
+	}
+}
+
+func TestMountOps_GetBusinessHours_Empty(t *testing.T) {
+	m, _, _ := setup(t) // sin seedWeek — la tabla queda vacía
+
+	reg := &mock.Router{}
+	reg.Configure(mock.Config{
+		Authorize: func(userID string, r model.Resource, a model.Action) bool { return true },
+	})
+	m.MountOps(reg)
+
+	ctx := &mock.Context{}
+	ctx.SetUserID("u1")
+	reg.Invoke("OP", "/"+businesshours.OpGetBusinessHours, ctx)
+
+	if ctx.Status != 404 {
+		t.Fatalf("expected 404 for an empty schedule, got %d", ctx.Status)
 	}
 }

@@ -14,6 +14,6 @@ require (
 
 require (
 	github.com/tinywasm/form v0.3.10 // indirect
-	github.com/tinywasm/json v0.5.17 // indirect
+	github.com/tinywasm/json v0.5.17
 	github.com/tinywasm/storage v0.0.2
 )
