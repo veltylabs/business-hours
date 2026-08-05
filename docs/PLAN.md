@@ -3,8 +3,9 @@ PLAN: "feat: business_hours joins the reusable-module harness (OpModule, IDGener
 TAG: v0.1.0
 EXECUTOR: jules
 REVIEWER: none
-STATUS: running
+STATUS: review
 SESSION: 4130746701034865899
+PR: https://github.com/veltylabs/business_hours/pull/5
 ---
 
 > This plan is dispatched via the CodeJob workflow. See skill: **agents-workflow**.
