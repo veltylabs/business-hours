@@ -15,13 +15,13 @@ type fakeIDs struct{ n int }
 
 func (f *fakeIDs) NewID() string {
 	f.n++
-	return "test-id-" + fmt.Convert(f.n).String() // github.com/tinywasm/fmt — never stdlib strconv
+	return "test-id-" + fmt.Convert(f.n).String() // github.com/tinywasm/fmt — nunca stdlib strconv
 }
 
-// setup builds a Module over storage/mem and returns the SAME *orm.DB handle it was given —
-// seedWeek below uses it directly (orm.DB.Create is exported; there is no need to reach into
-// Module's unexported db field, and there is no write Op yet to seed through instead — see
-// AGENTS.md's domain-specific notes on why this module's one Op is read-only).
+// setup construye un Module sobre storage/mem y devuelve el MISMO manejador *orm.DB que recibió —
+// seedWeek a continuación lo usa directamente (orm.DB.Create está exportado; no hay necesidad de acceder al
+// campo db no exportado de Module, y todavía no hay una operación de escritura para sembrar datos a través de ella — ver
+// las notas específicas de dominio en AGENTS.md sobre por qué la única operación de este módulo es de solo lectura).
 func setup(t *testing.T) (*businesshours.Module, *orm.DB, *fakeIDs) {
 	t.Helper()
 	db := orm.New(mem.New())
@@ -33,8 +33,8 @@ func setup(t *testing.T) (*businesshours.Module, *orm.DB, *fakeIDs) {
 	return m, db, ids
 }
 
-// seedWeek inserts 7 rows through the same *orm.DB the test already holds — the composition-root
-// app would seed the same way, since this module has no write Op (see AGENTS.md).
+// seedWeek inserta 7 filas a través del mismo *orm.DB que la prueba ya posee — la aplicación de composición
+// raíz sembraría los datos de la misma manera, ya que este módulo no tiene una operación de escritura (ver AGENTS.md).
 func seedWeek(t *testing.T, db *orm.DB, ids *fakeIDs) {
 	t.Helper()
 	for day := 0; day < 7; day++ {
@@ -87,9 +87,9 @@ func TestMountOps_GetBusinessHours(t *testing.T) {
 	m, db, ids := setup(t)
 	seedWeek(t, db, ids)
 
-	// mock.Router's zero value is legal (no Authn, no Authorize) but DENIES every guarded
-	// route (model.Allowed(nil, ...) == false) — Configure an Authorize that allows, so the
-	// success path is actually exercised, not accidentally passing via a 403 nobody checked.
+	// El valor cero de mock.Router es legal (sin Authn, sin Authorize) pero DENIEGA cada ruta
+	// protegida (model.Allowed(nil, ...) == false) — configure un Authorize que lo permita, para que la
+	// ruta de éxito realmente se ejercite, en lugar de pasar accidentalmente a través de un 403 que nadie verificó.
 	reg := &mock.Router{}
 	reg.Configure(mock.Config{
 		Authorize: func(userID string, r model.Resource, a model.Action) bool { return true },
@@ -109,8 +109,8 @@ func TestMountOps_GetBusinessHours(t *testing.T) {
 		t.Errorf("expected Requires(business_hours, Read), got %q/%v", info.Resource, info.Action)
 	}
 
-	ctx := &mock.Context{}      // no body needed — the op declares Accepts(nil) and never decodes
-	ctx.SetUserID("u1")         // AccessGuarded needs an identity before the gate runs
+	ctx := &mock.Context{}      // no se necesita cuerpo — la operación declara Accepts(nil) y nunca decodifica
+	ctx.SetUserID("u1")         // AccessGuarded necesita una identidad antes de que se ejecute la puerta
 	reg.Invoke("OP", wantPath, ctx)
 
 	if ctx.Status != 0 {

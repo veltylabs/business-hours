@@ -8,8 +8,8 @@ import (
 
 var dayNames = [7]string{"Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"}
 
-// Item implements view.Itemizer — the ONLY view-specific code this record carries. The Presenter
-// indexes rows by ID from this during Reload; there is no manual byID/WithFill lookup anymore.
+// Item implementa view.Itemizer — el ÚNICO código específico de la vista que lleva este registro. El Presenter
+// indexa las filas por ID a partir de esto durante la recarga (Reload); ya no hay búsqueda manual por ID o WithFill.
 func (r *BusinessHours) Item() view.Item {
 	return view.Item{
 		ID:          r.Id,
@@ -18,10 +18,10 @@ func (r *BusinessHours) Item() view.Item {
 	}
 }
 
-// NewView builds the weekly-schedule Presenter — the tech-agnostic engine a renderer (crudview, or
-// any other) wraps. It is THIS module's job to build it (importing only view+model+router); the
-// app decides which renderer draws it. Read-only: no WithSaveOp/WithDeleteOp — there is no
-// create/update/delete Op yet (see AGENTS.md "Domain-specific notes").
+// NewView construye el Presenter del horario semanal — el motor agnóstico de la tecnología que un renderizador (crudview o
+// cualquier otro) envuelve. Es tarea de ESTE módulo construirlo (importando solo view+model+router); la
+// aplicación decide qué renderizador lo dibuja. Solo lectura: sin WithSaveOp/WithDeleteOp — no hay una
+// operación de creación/actualización/eliminación todavía (ver AGENTS.md "Domain-specific notes").
 func NewView(caller router.Caller) view.Presenter {
 	record := &BusinessHours{}
 
@@ -34,8 +34,8 @@ func NewView(caller router.Caller) view.Presenter {
 	)
 }
 
-// scheduleLabel formats one row's hours for display — "08:00–18:00" when open, "Cerrado" (plus
-// any notes) when closed. Presentation-only; the raw Op (Stage 3) never applies this formatting.
+// scheduleLabel formatea las horas de una fila para su visualización — "08:00–18:00" cuando está abierto, "Cerrado" (más
+// cualquier nota) cuando está cerrado. Solo para fines de presentación; la operación cruda (Etapa 3) nunca aplica este formato.
 func scheduleLabel(r *BusinessHours) string {
 	if !r.IsOpen {
 		if r.Notes != "" {

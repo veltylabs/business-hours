@@ -5,11 +5,11 @@ import (
 	"github.com/tinywasm/model"
 )
 
-// BusinessHoursModel: one row per day of the week. `day_of_week` is unique — see AGENTS.md
-// "Domain-specific notes" for why this module never writes more than 7 rows.
-// open_time/close_time carry a Permitted floor ("HH:MM": digits + ':' only, exactly 5 chars) —
-// a free-text time column with the format documented only in a comment is the magic-string
-// anti-pattern CONSTRUCTION_HARNESS forbids; the constraint belongs in the Definition.
+// BusinessHoursModel: una fila por día de la semana. `day_of_week` es único — ver AGENTS.md
+// "Domain-specific notes" para saber por qué este módulo nunca escribe más de 7 filas.
+// open_time/close_time tienen un límite permitido ("HH:MM": solo dígitos + ':', exactamente 5 caracteres) —
+// una columna de tiempo de texto libre con el formato documentado solo en un comentario es el patrón
+// antipatrón de cadena mágica que CONSTRUCTION_HARNESS prohíbe; la restricción pertenece a la definición.
 var BusinessHoursModel = model.Definition{
 	Name: "business_hours",
 	Fields: model.Fields{

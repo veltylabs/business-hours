@@ -41,9 +41,9 @@ func TestNewView_ListsWeek(t *testing.T) {
 	if items[1].Label != "Lunes" {
 		t.Errorf("expected Lunes label, got %q", items[1].Label)
 	}
-	// Presenter has no CanSave()/CanDelete() — Saver/Deleter are capabilities the renderer
-	// discovers by type assertion (view.Presenter doc comment). Absent WithSaveOp/WithDeleteOp,
-	// view.New returns a bare core that implements neither.
+	// El Presenter no tiene CanSave()/CanDelete() — Saver/Deleter son capacidades que el renderizador
+	// descubre mediante aserción de tipo (comentario de documentación de view.Presenter). En ausencia de WithSaveOp/WithDeleteOp,
+	// view.New devuelve un núcleo básico que no implementa ninguno de los dos.
 	if _, ok := p.(view.Saver); ok {
 		t.Error("expected a read-only presenter: no SaveOp configured")
 	}

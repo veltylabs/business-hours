@@ -10,8 +10,8 @@ import (
 )
 
 type Deps struct {
-	IDs       model.IDGenerator // required — the module never builds its own
-	Publisher events.Publisher  // optional — nil disables publishing silently
+	IDs       model.IDGenerator // requerido — el módulo nunca lo construye por sí mismo
+	Publisher events.Publisher  // opcional — nil deshabilita la publicación silenciosamente
 }
 
 type Module struct {
@@ -22,11 +22,11 @@ type Module struct {
 
 func New(db *orm.DB, deps Deps) (*Module, error) {
 	if deps.IDs == nil {
-		return nil, fmt.Err("business_hours: Deps.IDs is required")
+		return nil, fmt.Err("business_hours: Deps.IDs es requerido")
 	}
-	// ddl.Compiler is an optional capability — only SQL backends (sqlt, postgres) implement it.
-	// storage/mem (this module's own tests, Stage 6) creates tables lazily and needs no DDL at
-	// all, so a type assertion, not an unconditional call, is how the module stays agnostic here.
+	// ddl.Compiler es una capacidad opcional — solo los backends de SQL (sqlt, postgres) la implementan.
+	// storage/mem (las pruebas propias de este módulo, Etapa 6) crea tablas de forma perezosa (lazy) y no necesita
+	// DDL en absoluto, por lo que una aserción de tipo, y no una llamada incondicional, es cómo el módulo se mantiene agnóstico aquí.
 	if ddlCompiler, ok := db.RawConn().(ddl.Compiler); ok {
 		if err := ddl.New(db.RawConn(), ddlCompiler).CreateTable(&BusinessHours{}); err != nil {
 			return nil, err
@@ -40,8 +40,8 @@ const OpGetBusinessHours = "get_business_hours"
 func (m *Module) ModelName() string { return "business_hours" }
 
 func (m *Module) MountOps(reg router.OpRegistry) {
-	// This op takes no parameters — Accepts(nil) is the documented "no args" declaration
-	// (router.Route's doc comment). Never invent an empty args struct for a no-args op.
+	// Esta operación no acepta parámetros — Accepts(nil) es la declaración documentada para "sin argumentos"
+	// (comentario de documentación de router.Route). Nunca invente una estructura de argumentos vacía para una operación sin argumentos.
 	reg.Op(OpGetBusinessHours, m.opGetBusinessHours).
 		Requires("business_hours", model.Read).
 		Accepts(nil)
@@ -49,8 +49,8 @@ func (m *Module) MountOps(reg router.OpRegistry) {
 
 var _ router.OpModule = (*Module)(nil)
 
-// GetSchedule returns all 7 rows sorted by day_of_week, or ErrNotFound if the table is empty
-// (unseeded — the composition-root app is responsible for seeding the 7 rows; see AGENTS.md).
+// GetSchedule devuelve las 7 filas ordenadas por day_of_week, o ErrNotFound si la tabla está vacía
+// (sin sembrar — la aplicación de composición raíz es responsable de sembrar las 7 filas; ver AGENTS.md).
 func (m *Module) GetSchedule() ([]BusinessHours, error) {
 	rows, err := ReadAllBusinessHours(m.db.Query(&BusinessHours{}).OrderBy(BusinessHours_.DayOfWeek).Asc())
 	if err != nil {
@@ -69,8 +69,8 @@ func (m *Module) GetSchedule() ([]BusinessHours, error) {
 func (m *Module) opGetBusinessHours(ctx router.Context) {
 	rows, err := m.GetSchedule()
 	if err != nil {
-		// Status convention (ecosystem-wide): 404 for not-found, 500 only for genuine internal
-		// errors — never collapse both into 500 (the "runtime mystery" the harness forbids).
+		// Convención de estado (en todo el ecosistema): 404 para no encontrado, 500 solo para errores internos
+		// genuinos — nunca colapse ambos en 500 (el "misterio de tiempo de ejecución" que el arnés prohíbe).
 		if err == ErrNotFound {
 			ctx.WriteStatus(404)
 			return
