@@ -2,6 +2,8 @@
 PLAN: "refactor!: webtyp.com rename + adopt the new view.New(Lister, record, opts) API"
 EXECUTOR: jules
 REVIEWER: none
+STATUS: running
+SESSION: 15809867557506129029
 ---
 
 > This plan is dispatched via the CodeJob workflow. See skill: agents-workflow.
