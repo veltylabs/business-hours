@@ -1,9 +1,9 @@
 package businesshours
 
 import (
-	"github.com/tinywasm/model"
-	"github.com/tinywasm/router"
-	"github.com/tinywasm/view"
+	"webtyp.com/model"
+	"webtyp.com/router"
+	"webtyp.com/view"
 )
 
 var dayNames = [7]string{"Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"}

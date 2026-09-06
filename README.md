@@ -16,7 +16,7 @@ Manages the clinic's weekly operating schedule with one entry per day of the wee
 
 ```go
 import (
-    "github.com/tinywasm/mcp"
+    "github.com/webtyp/mcp"
     businesshours "github.com/veltylabs/business-hours"
 )
 

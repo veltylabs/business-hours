@@ -3,12 +3,12 @@ package tests
 import (
 	"testing"
 
-	"github.com/tinywasm/fmt"
-	"github.com/tinywasm/json"
-	"github.com/tinywasm/model"
-	"github.com/tinywasm/orm"
-	"github.com/tinywasm/router/mock"
-	"github.com/tinywasm/storage/mem"
+	"webtyp.com/fmt"
+	"webtyp.com/json"
+	"webtyp.com/model"
+	"webtyp.com/orm"
+	"webtyp.com/router/mock"
+	"webtyp.com/storage/mem"
 	businesshours "github.com/veltylabs/business_hours"
 )
 
@@ -16,7 +16,7 @@ type fakeIDs struct{ n int }
 
 func (f *fakeIDs) NewID() string {
 	f.n++
-	return "test-id-" + fmt.Convert(f.n).String() // github.com/tinywasm/fmt — nunca stdlib strconv
+	return "test-id-" + fmt.Convert(f.n).String() // webtyp.com/fmt — nunca stdlib strconv
 }
 
 // setup construye un Module sobre storage/mem y devuelve el MISMO manejador *orm.DB que recibió —

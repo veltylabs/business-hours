@@ -1,12 +1,12 @@
 package businesshours
 
 import (
-	"github.com/tinywasm/ddl"
-	"github.com/tinywasm/events"
-	"github.com/tinywasm/fmt"
-	"github.com/tinywasm/model"
-	"github.com/tinywasm/orm"
-	"github.com/tinywasm/router"
+	"webtyp.com/ddl"
+	"webtyp.com/events"
+	"webtyp.com/fmt"
+	"webtyp.com/model"
+	"webtyp.com/orm"
+	"webtyp.com/router"
 )
 
 type Deps struct {

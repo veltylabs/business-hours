@@ -1,8 +1,8 @@
 package businesshours
 
 import (
-	"github.com/tinywasm/fmt"
-	"github.com/tinywasm/model"
+	"webtyp.com/fmt"
+	"webtyp.com/model"
 )
 
 // BusinessHoursModel: una fila por día de la semana. `day_of_week` es único — ver AGENTS.md
