@@ -1,8 +1,7 @@
 package businesshours
 
 import (
-	"webtyp.com/model"
-	"webtyp.com/router"
+	"webtyp.com/orm"
 	"webtyp.com/view"
 )
 
@@ -19,23 +18,19 @@ func (r *BusinessHours) Item() view.Item {
 }
 
 // NewView construye el Presenter del horario semanal — el motor agnóstico de la tecnología que un renderizador (crudview o
-// cualquier otro) envuelve. Es tarea de ESTE módulo construirlo (importando solo view+model+router); la
+// cualquier otro) envuelve. Es tarea de ESTE módulo construirlo (importando solo view+model+orm); la
 // aplicación decide qué renderizador lo dibuja. Solo lectura: sin WithSaveOp/WithDeleteOp — no hay una
 // operación de creación/actualización/eliminación todavía (ver AGENTS.md "Domain-specific notes").
-func NewView(caller router.Caller) view.Presenter {
-	record := &BusinessHours{}
-
+func NewView(db *orm.DB) view.Presenter {
 	return view.New(
-		caller,
-		record,
-		OpGetBusinessHours,
-		func() model.ModelSlice { return &BusinessHoursList{} },
+		lister{db: db},
+		&BusinessHours{},
 		view.WithTitle("Horario de atención"),
 	)
 }
 
 // scheduleLabel formatea las horas de una fila para su visualización — "08:00–18:00" cuando está abierto, "Cerrado" (más
-// cualquier nota) cuando está cerrado. Solo para fines de presentación; la operación cruda (Etapa 3) nunca aplica este formato.
+// cualquier nota) cuando está cerrado. Solo para fines de presentación; la operación cruda nunca aplica este formato.
 func scheduleLabel(r *BusinessHours) string {
 	if !r.IsOpen {
 		if r.Notes != "" {

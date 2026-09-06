@@ -3,34 +3,22 @@ package tests
 import (
 	"testing"
 
-	"webtyp.com/model"
+	"webtyp.com/orm"
+	"webtyp.com/storage/mem"
 	"webtyp.com/view"
-	"webtyp.com/view/conformance"
 	businesshours "github.com/veltylabs/business_hours"
 )
 
 func TestNewView_ListsWeek(t *testing.T) {
-	caller := &conformance.FakeCaller{
-		Reply: func(op string, into model.Decodable) {
-			if op != businesshours.OpGetBusinessHours {
-				return
-			}
-			dst := into.(*businesshours.BusinessHoursList)
-			week := make(businesshours.BusinessHoursList, 7)
-			for day := 0; day < 7; day++ {
-				bh := &businesshours.BusinessHours{DayOfWeek: int64(day), IsOpen: day != 0 && day != 6}
-				if bh.IsOpen {
-					bh.OpenTime, bh.CloseTime = "08:00", "18:00"
-				} else {
-					bh.Notes = "Cerrado"
-				}
-				week[day] = bh
-			}
-			*dst = week
-		},
+	db := orm.New(mem.New())
+	ids := &fakeIDs{}
+	_, err := businesshours.New(db, businesshours.Deps{IDs: ids})
+	if err != nil {
+		t.Fatalf("New: %v", err)
 	}
+	seedWeek(t, db, ids)
 
-	p := businesshours.NewView(caller)
+	p := businesshours.NewView(db)
 	if err := p.Reload(); err != nil {
 		t.Fatalf("Reload: %v", err)
 	}
@@ -41,9 +29,6 @@ func TestNewView_ListsWeek(t *testing.T) {
 	if items[1].Label != "Lunes" {
 		t.Errorf("expected Lunes label, got %q", items[1].Label)
 	}
-	// El Presenter no tiene CanSave()/CanDelete() — Saver/Deleter son capacidades que el renderizador
-	// descubre mediante aserción de tipo (comentario de documentación de view.Presenter). En ausencia de WithSaveOp/WithDeleteOp,
-	// view.New devuelve un núcleo básico que no implementa ninguno de los dos.
 	if _, ok := p.(view.Saver); ok {
 		t.Error("expected a read-only presenter: no SaveOp configured")
 	}
